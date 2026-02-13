@@ -13,11 +13,13 @@ const {
   PermissionsBitField
 } = require("discord.js");
 
-// Coloque seu token direto aqui:
-const TOKEN = "MTQ3MjAwMTE2ODY4NjE4NjYxOQ.GupDWG.xP8HreIq93RrqhdHrNcRlo8mipsH6Yo8wWnP9Q"; // ⚠️ NÃO compartilhe este token
+// O token será pego da variável de ambiente
+const TOKEN = process.env.TOKEN;
 
-// Limite da subfila
+// Limite de jogadores por subfila
 const LIMITE_SUBFILA = 2;
+
+// Cria o cliente
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
 // Delay utilitário
@@ -74,11 +76,10 @@ client.once("ready", async () => {
   const rest = new REST({ version: "10" }).setToken(TOKEN);
 
   try {
-    // Opcional: colocar o GUILD_ID direto aqui se quiser registro rápido
-    const GUILD_ID = 1470171831292919982; // ou deixe vazio para global
-    if (GUILD_ID) {
+    // Se quiser registrar comandos instantaneamente, coloque GUILD_ID em env
+    if (process.env.GUILD_ID) {
       await rest.put(
-        Routes.applicationGuildCommands(client.user.id, GUILD_ID),
+        Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID),
         { body: commands }
       );
       console.log("✅ Comandos registrados no servidor");
@@ -87,7 +88,7 @@ client.once("ready", async () => {
         Routes.applicationCommands(client.user.id),
         { body: commands }
       );
-      console.log("✅ Comandos registrados globalmente");
+      console.log("✅ Comandos registrados globalmente (podem demorar até 1h)");
     }
   } catch (err) {
     console.error("Erro ao registrar comandos:", err);
@@ -149,12 +150,10 @@ client.on("interactionCreate", async interaction => {
 
     for (let valor of VALORES) {
       filas[valor] = { infinito: [], normal: [] };
-
       await interaction.channel.send({
         embeds: [criarEmbed(valor)],
         components: [criarBotoes(valor)]
       });
-
       await delay(2000);
     }
 
