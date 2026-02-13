@@ -181,8 +181,17 @@ client.on("interactionCreate", async interaction => {
     filas[valor].infinito = filas[valor].infinito.filter(id => id !== userId);
     filas[valor].normal = filas[valor].normal.filter(id => id !== userId);
 
-    if (tipo === "infinito") filas[valor].infinito.push(userId);
-    if (tipo === "normal") filas[valor].normal.push(userId);
+    if (tipo === "infinito") {
+      filas[valor].infinito.push(userId);
+    } else if (tipo === "normal") {
+      filas[valor].normal.push(userId);
+    } else if (tipo === "sair") {
+      // Apenas atualiza embed após remover o usuário
+      return await interaction.update({
+        embeds: [criarEmbed(valor, client)],
+        components: [criarBotoes(valor)]
+      });
+    }
 
     // Se a subfila atingir 2 jogadores, cria canal
     const subfila = filas[valor][tipo];
