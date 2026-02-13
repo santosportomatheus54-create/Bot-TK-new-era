@@ -13,13 +13,11 @@ const {
   PermissionsBitField
 } = require("discord.js");
 
-// O token será pego da variável de ambiente
+// Token e GUILD_ID via Environment Variables
 const TOKEN = process.env.TOKEN;
+const GUILD_ID = process.env.GUILD_ID; // opcional
 
-// Limite de jogadores por subfila
 const LIMITE_SUBFILA = 2;
-
-// Cria o cliente
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
 // Delay utilitário
@@ -32,13 +30,26 @@ const VALORES = [100, 50, 20, 10, 5, 2, 1];
 let filas = {};
 
 // ================= EMBED =================
-function criarEmbed(valor) {
+function criarEmbed(valor, client) {
   const fila = filas[valor];
+
+  // Listar nomes de usuários
+  const usuariosInfinito = fila.infinito.map(id => {
+    const user = client.users.cache.get(id);
+    return user ? user.username : "Desconhecido";
+  });
+  const usuariosNormal = fila.normal.map(id => {
+    const user = client.users.cache.get(id);
+    return user ? user.username : "Desconhecido";
+  });
+
   return new EmbedBuilder()
     .setTitle(`❄️ FILA R$ ${valor}`)
     .setDescription(
-      `🧊 Gelo Infinito (${fila.infinito.length}/${LIMITE_SUBFILA})\n` +
-      `❄️ Gelo Normal (${fila.normal.length}/${LIMITE_SUBFILA})`
+      `🧊 Gelo Infinito (${fila.infinito.length}/${LIMITE_SUBFILA}):\n` +
+      (usuariosInfinito.length ? usuariosInfinito.join("\n") : "Nenhum") +
+      `\n\n❄️ Gelo Normal (${fila.normal.length}/${LIMITE_SUBFILA}):\n` +
+      (usuariosNormal.length ? usuariosNormal.join("\n") : "Nenhum")
     )
     .setColor("#0d1b2a")
     .setFooter({ text: "Sistema Profissional • Azul & Preto" })
@@ -76,10 +87,9 @@ client.once("ready", async () => {
   const rest = new REST({ version: "10" }).setToken(TOKEN);
 
   try {
-    // Se quiser registrar comandos instantaneamente, coloque GUILD_ID em env
-    if (process.env.GUILD_ID) {
+    if (GUILD_ID) {
       await rest.put(
-        Routes.applicationGuildCommands(client.user.id, process.env.GUILD_ID),
+        Routes.applicationGuildCommands(client.user.id, GUILD_ID),
         { body: commands }
       );
       console.log("✅ Comandos registrados no servidor");
@@ -88,7 +98,7 @@ client.once("ready", async () => {
         Routes.applicationCommands(client.user.id),
         { body: commands }
       );
-      console.log("✅ Comandos registrados globalmente (podem demorar até 1h)");
+      console.log("✅ Comandos registrados globalmente (até 1h para aparecer)");
     }
   } catch (err) {
     console.error("Erro ao registrar comandos:", err);
@@ -151,7 +161,7 @@ client.on("interactionCreate", async interaction => {
     for (let valor of VALORES) {
       filas[valor] = { infinito: [], normal: [] };
       await interaction.channel.send({
-        embeds: [criarEmbed(valor)],
+        embeds: [criarEmbed(valor, client)],
         components: [criarBotoes(valor)]
       });
       await delay(2000);
@@ -181,7 +191,7 @@ client.on("interactionCreate", async interaction => {
     }
 
     await interaction.update({
-      embeds: [criarEmbed(valor)],
+      embeds: [criarEmbed(valor, client)],
       components: [criarBotoes(valor)]
     });
   }
