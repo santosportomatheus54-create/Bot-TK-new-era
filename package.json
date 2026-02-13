@@ -1,7 +1,7 @@
 {
   "name": "bot-filas-profissional",
   "version": "1.0.0",
-  "description": "Bot profissional de filas com modos, subfilas, criação de canal automático e embed azul/preto",
+  "description": "Bot de filas profissional para Discord com botões, subfilas, criação de canal automática e embed azul/preto",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
@@ -9,6 +9,9 @@
   },
   "author": "TOKY",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "discord.js": "^14.14.1"
   }
