@@ -14,7 +14,7 @@ const {
 } = require("discord.js");
 
 // Coloque seu token direto aqui:
-const TOKEN = MTQ3MjAwMTE2ODY4NjE4NjYxOQ.GupDWG.xP8HreIq93RrqhdHrNcRlo8mipsH6Yo8wWnP9Q; // ⚠️ NÃO compartilhe este token
+const TOKEN = "MTQ3MjAwMTE2ODY4NjE4NjYxOQ.GupDWG.xP8HreIq93RrqhdHrNcRlo8mipsH6Yo8wWnP9Q"; // ⚠️ NÃO compartilhe este token
 
 // Limite da subfila
 const LIMITE_SUBFILA = 2;
