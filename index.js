@@ -13,7 +13,6 @@ const {
   PermissionsBitField
 } = require("discord.js");
 
-// Token e GUILD_ID via Environment Variables
 const TOKEN = process.env.TOKEN;
 const GUILD_ID = process.env.GUILD_ID; // opcional
 
@@ -23,17 +22,13 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 // Delay utilitário
 function delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
 
-// Valores das filas
 const VALORES = [100, 50, 20, 10, 5, 2, 1];
-
-// Estrutura das filas
 let filas = {};
 
 // ================= EMBED =================
 function criarEmbed(valor, client) {
   const fila = filas[valor];
 
-  // Listar nomes de usuários
   const usuariosInfinito = fila.infinito.map(id => {
     const user = client.users.cache.get(id);
     return user ? user.username : "Desconhecido";
@@ -44,11 +39,12 @@ function criarEmbed(valor, client) {
   });
 
   return new EmbedBuilder()
-    .setTitle(`❄️ FILA R$ ${valor}`)
+    .setTitle(`ORG TK 💰 - Fila R$ ${valor}`)
     .setDescription(
-      `🧊 Gelo Infinito (${fila.infinito.length}/${LIMITE_SUBFILA}):\n` +
+      "Vem farmar na ORG TK!\n\n" +
+      `💸 Gelo Infinito (${fila.infinito.length}/${LIMITE_SUBFILA}):\n` +
       (usuariosInfinito.length ? usuariosInfinito.join("\n") : "Nenhum") +
-      `\n\n❄️ Gelo Normal (${fila.normal.length}/${LIMITE_SUBFILA}):\n` +
+      `\n\n🔹 Gelo Normal (${fila.normal.length}/${LIMITE_SUBFILA}):\n` +
       (usuariosNormal.length ? usuariosNormal.join("\n") : "Nenhum")
     )
     .setColor("#0d1b2a")
@@ -61,11 +57,11 @@ function criarBotoes(valor) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`infinito_${valor}`)
-      .setLabel("🧊 Gelo Infinito")
+      .setLabel("💸 Gelo Infinito")
       .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
       .setCustomId(`normal_${valor}`)
-      .setLabel("❄️ Gelo Normal")
+      .setLabel("🔹 Gelo Normal")
       .setStyle(ButtonStyle.Success),
     new ButtonBuilder()
       .setCustomId(`sair_${valor}`)
@@ -107,7 +103,7 @@ client.once("ready", async () => {
 
 // ================= FUNÇÃO CRIAR CANAL =================
 async function criarCanalPartida(guild, valor, tipo, jogadores) {
-  const nomeCanal = `🎮 ${tipo.toUpperCase()} R$${valor}`;
+  const nomeCanal = `💸 ${tipo.toUpperCase()} R$${valor}`; // 💸 no início
 
   const canal = await guild.channels.create({
     name: nomeCanal,
@@ -127,7 +123,6 @@ async function criarCanalPartida(guild, valor, tipo, jogadores) {
     `Jogadores: ${jogadores.map(id => `<@${id}>`).join(", ")}`
   );
 
-  // Remove jogadores da subfila
   filas[valor][tipo] = filas[valor][tipo].filter(id => !jogadores.includes(id));
 }
 
@@ -186,14 +181,12 @@ client.on("interactionCreate", async interaction => {
     } else if (tipo === "normal") {
       filas[valor].normal.push(userId);
     } else if (tipo === "sair") {
-      // Apenas atualiza embed após remover o usuário
       return await interaction.update({
         embeds: [criarEmbed(valor, client)],
         components: [criarBotoes(valor)]
       });
     }
 
-    // Se a subfila atingir 2 jogadores, cria canal
     const subfila = filas[valor][tipo];
     if (subfila.length >= LIMITE_SUBFILA) {
       await criarCanalPartida(interaction.guild, valor, tipo, [...subfila]);
